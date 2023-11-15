@@ -1,62 +1,43 @@
-const { MongoClient } = require('mongodb')
-const jwt = require ('jsonwebtoken');
+import { ObjectId } from "mongodb";
+import { client, conection } from "../databases/conection.js";
 
-const client = new MongoClient(process.env.MONGO_URI);
+export const getEmpleado = async (req, res) => {
+  try {
+    const empleadoDB = (await conection()).Empleado;
+    const result = await empleadoDB.find().toArray();
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Error en el servidor" });
+  }
+};
 
-async function getCollection(collectionName){
-    try {
-        await client.connect();
-        const database = client.db('AlquilerCampus');
-        const collection = database.collection(collectionName);
-        return collection;
-    } catch (error) {
-        throw "eso no sirve"
-    }
-}
+export const postEmpleado = async (req, res) => {
+  try {
+    const { id, nombre, apellido, numero_de_documento, direccion, telefono, cargo } = req.body;
+    const db = await conection();
+    const nuevo = { id, nombre, apellido, numero_de_documento, direccion, telefono, cargo };
+    await db.Empleado.insertOne(nuevo);
+    res.json(nuevo);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Hubo un error al agregar el empleado" });
+  }
+};
 
-const getEmpleadoVendedor = async (req,res)=>{
-    const validateToken = req.header('token');
-    if (!validateToken){
-        return res.status(401).json({
-            msg: "no tiene token pa"
-        })
-    }
-    try {
-        const validado = jwt.verify(validateToken,process.env.SECRET_OR_PRIVATE_KEY)
-        if(validado){
-            const collection = await getCollection('Empleado');
-            const result = await collection.find({cargo: 'Vendedor'}).toArray();
-            res.json({
-                result
-            })
-        }
-    } catch (error) {
-        throw "eso no sirve"
-    }
-}
-
-const getEmpleadoCargo = async (req,res)=>{
-    const validateToken = req.header('token');
-    if (!validateToken){
-        return res.status(401).json({
-            msg: "no tiene token pa"
-        })
-    }
-    try {
-        const validado = jwt.verify(validateToken,process.env.SECRET_OR_PRIVATE_KEY)
-        if(validado){
-            const collection = await getCollection('Empleado');
-            const result = await collection.find({$or:[{cargo: 'Gerente'}, {cargo: 'Asistente'}]}).toArray();
-            res.json({
-                result
-            })
-        }
-    } catch (error) {
-        throw "eso no sirve"
-    }
-}
-
-module.exports = {
-    getEmpleadoVendedor,
-    getEmpleadoCargo
-}
+export const deleteEmpleado = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const empleadoId = new ObjectId(id);
+    const empleadoDB = (await conection()).Empleado;
+    const empleado = await empleadoDB.findOneAndDelete({
+      _id: empleadoId,
+    });
+    res.json({ message: "Se ha elimenado el empleado", empleado });
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .json({ error: "Hubo un error al eliminar al empleado de la database" });
+  }
+};

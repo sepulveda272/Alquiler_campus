@@ -1,10 +1,10 @@
-const { Router } = require('express');
-const { getCantidadTotal, getObtenerCantidadAutomovilesPorSucursal } = require('../controllers/sucursal.controllers.js');
+import { Router } from "express"
+import  { getSucursal, postSucursal, deleteSucursal } from '../controllers/sucursal.controllers.js';
 
 const router = Router();
 
-router.get('/sucursalesT', getCantidadTotal);
-router.get('/cantiddadTotal', getObtenerCantidadAutomovilesPorSucursal)
+router.get('/', getSucursal);
+router.post('/add', postSucursal);
+router.delete('/:id', deleteSucursal);
 
-
-module.exports = router;
+export default router;

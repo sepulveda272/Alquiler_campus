@@ -1,11 +1,10 @@
-const { Router } = require('express');
-const { getCliente, getClienteDNI, getListarReservasPendientesCliente } = require('../controllers/clientes.controllers.js');
+import { Router } from "express"
+import  { getCliente, postCliente, deleteCliente } from '../controllers/clientes.controllers.js';
 
 const router = Router();
 
-router.get('/allcliente', getCliente);
-router.get('/clienteDNI', getClienteDNI);
-router.get('/:id', getListarReservasPendientesCliente);
+router.get('/', getCliente);
+router.post('/add', postCliente);
+router.delete('/:id', deleteCliente);
 
-
-module.exports = router;
+export default router;

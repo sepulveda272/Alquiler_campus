@@ -1,61 +1,43 @@
-const { MongoClient } = require('mongodb')
-const jwt = require ('jsonwebtoken');
+import { ObjectId } from "mongodb";
+import { client, conection } from "../databases/conection.js";
 
-const client = new MongoClient(process.env.MONGO_URI);
+export const getReserva = async (req, res) => {
+  try {
+    const reservaDB = (await conection()).Reserva;
+    const result = await reservaDB.find().toArray();
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Error en el servidor" });
+  }
+};
 
-async function getCollection(collectionName){
-    try {
-        await client.connect();
-        const database = client.db('AlquilerCampus');
-        const collection = database.collection(collectionName);
-        return collection;
-    } catch (error) {
-        throw "eso no sirve"
-    }
-}
+export const postReserva = async (req, res) => {
+  try {
+    const { id, cliente, automovil, fecha_reserva, fecha_inicio, fecha_fin, estado } = req.body;
+    const db = await conection();
+    const nuevo = { id, cliente, automovil, fecha_reserva, fecha_inicio, fecha_fin, estado };
+    await db.Reserva.insertOne(nuevo);
+    res.json(nuevo);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Hubo un error al agregar la reserva" });
+  }
+};
 
-const getReserva = async (req,res)=>{
-    const validateToken = req.header('token');
-    if (!validateToken){
-        return res.status(401).json({
-            msg: "no tiene token pa"
-        })
-    }
-    try {
-        const validado = jwt.verify(validateToken,process.env.SECRET_OR_PRIVATE_KEY)
-        if(validado){
-            const collectionReserva = await getCollection('Reserva');
-            const collectionClientes = await getCollection('Cliente');
-            const collectionAutomovil = await getCollection('Automovil');
-
-            const reservasPendientes = await collectionReserva.find({ estado: 'Pendiente' }).toArray();
-
-            async function obtenerInformacionCliente(clienteId) {
-            return await collectionClientes.findOne({ id: clienteId });
-            }
-
-            async function obtenerInformacionAutomovil(automovilId) {
-            return await collectionAutomovil.findOne({ id: automovilId });
-            }
-
-            const resultData = await Promise.all(reservasPendientes.map(async (reserva) => {
-            const clienteInfo = await obtenerInformacionCliente(reserva.cliente);
-            const automovilInfo = await obtenerInformacionAutomovil(reserva.automovil);
-
-            return {
-                reserva: reserva,
-                cliente: clienteInfo,
-                automovil: automovilInfo
-            };
-            }));
-
-            res.json(resultData);
-        }
-    } catch (error) {
-        throw "eso no sirve"
-    }
-}
-
-module.exports = {
-    getReserva
-}
+export const deleteReserva = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const reservaId = new ObjectId(id);
+    const reservaDB = (await conection()).Reserva;
+    const reserva = await reservaDB.findOneAndDelete({
+      _id: reservaId,
+    });
+    res.json({ message: "Se ha elimenado el reserva", reserva });
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .json({ error: "Hubo un error al eliminar al reserva de la database" });
+  }
+};

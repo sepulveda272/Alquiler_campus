@@ -1,104 +1,43 @@
-const { MongoClient } = require('mongodb')
-const jwt = require ('jsonwebtoken');
+import { ObjectId } from "mongodb";
+import { client, conection } from "../databases/conection.js";
 
-const client = new MongoClient(process.env.MONGO_URI);
+export const getSucursal = async (req, res) => {
+  try {
+    const sucursalDB = (await conection()).Sucursal;
+    const result = await sucursalDB.find().toArray();
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Error en el servidor" });
+  }
+};
 
-async function getCollection(collectionName){
-    try {
-        await client.connect();
-        const database = client.db('AlquilerCampus');
-        const collection = database.collection(collectionName);
-        return collection;
-    } catch (error) {
-        throw "eso no sirve"
-    }
-}
+export const postSucursal = async (req, res) => {
+  try {
+    const { id, nombre_sucursal, direccion_sucursal, telefono_sucursal } = req.body;
+    const db = await conection();
+    const nuevo = { id, nombre_sucursal, direccion_sucursal, telefono_sucursal };
+    await db.Sucursal.insertOne(nuevo);
+    res.json(nuevo);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Hubo un error al agregar la sucursal" });
+  }
+};
 
-const getCantidadTotal = async (req,res)=>{
-    const validateToken = req.header('token');
-    if (!validateToken){
-        return res.status(401).json({
-            msg: "no tiene token pa"
-        })
-    }
-    try {
-        const validado = jwt.verify(validateToken,process.env.SECRET_OR_PRIVATE_KEY)
-        if(validado){
-            const collectionSucursalAuto = await getCollection('Sucursal_automoviles');
-            const lineaS = [
-            {
-                $group: {
-                _id: '$sucursal',
-                total_disponibles: { $sum: '$cantidad_disponible' }
-                }
-            },
-            {
-                $lookup: {
-                from: 'Sucursal',
-                localField: '_id',
-                foreignField: 'id',
-                as: 'sucursal'
-                }
-            },
-            {
-                $unwind: '$sucursal'
-            },
-            {
-                $sort: { 'sucursal.nombre_sucursal': 1 }
-            }
-            ];
-
-            const result = await collectionSucursalAuto.aggregate(lineaS).toArray();
-
-            res.json({
-                result
-            });
-        }
-    } catch (error) {
-        throw "eso no sirve"
-    }
-}
-
-const getObtenerCantidadAutomovilesPorSucursal = async (req,res)=>{
-    const validateToken = req.header('token');
-    if (!validateToken){
-        return res.status(401).json({
-            msg: "no tiene token pa"
-        })
-    }
-    try {
-        const validado = jwt.verify(validateToken,process.env.SECRET_OR_PRIVATE_KEY)
-        if(validado){
-            const collectionSucursal = await getCollection('Sucursal');
-            const lineaCAPS = [
-            {
-                $lookup: {
-                from: 'Sucursal_automoviles',
-                localField: 'id',
-                foreignField: 'sucursal',
-                as: 'automoviles'
-                }
-            },
-            {
-                $unwind: '$automoviles'
-            },
-            {
-                $group: {
-                _id: '$_id',
-                direccion: { $first: '$direccion_sucursal' },
-                cantidad_Automoviles: { $sum: '$automoviles.cantidad_disponible' }
-                }
-            }
-            ];
-            const resultadoAgregacion = await collectionSucursal.aggregate(lineaCAPS).toArray();
-            res.json(resultadoAgregacion);
-        }
-    } catch (error) {
-        throw "eso no sirve"
-    }
-} 
-
-module.exports = {
-    getCantidadTotal,
-    getObtenerCantidadAutomovilesPorSucursal
-}
+export const deleteSucursal = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const sucursalId = new ObjectId(id);
+    const sucursalDB = (await conection()).Sucursal;
+    const sucursal = await sucursalDB.findOneAndDelete({
+      _id: sucursalId,
+    });
+    res.json({ message: "Se ha elimenado el sucursal", sucursal });
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .json({ error: "Hubo un error al eliminar al sucursal de la database" });
+  }
+};

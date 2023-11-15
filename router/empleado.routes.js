@@ -1,10 +1,10 @@
-const { Router } = require('express');
-const { getEmpleadoVendedor, getEmpleadoCargo } = require('../controllers/empleado.controllers.js');
+import { Router } from "express"
+import  { getEmpleado, postEmpleado, deleteEmpleado } from '../controllers/empleado.controllers.js';
 
 const router = Router();
 
-router.get('/empleadoV', getEmpleadoVendedor);
-router.get('/empleadoC', getEmpleadoCargo);
+router.get('/', getEmpleado);
+router.post('/add', postEmpleado);
+router.delete('/:id', deleteEmpleado);
 
-
-module.exports = router;
+export default router;

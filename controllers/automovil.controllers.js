@@ -1,83 +1,43 @@
-const { MongoClient } = require('mongodb')
-const jwt = require ('jsonwebtoken');
+import { ObjectId } from "mongodb";
+import { client, conection } from "../databases/conection.js";
 
-const client = new MongoClient(process.env.MONGO_URI);
+export const getAutomovil = async (req, res) => {
+  try {
+    const automovilDB = (await conection()).Automovil;
+    const result = await automovilDB.find().toArray();
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Error en el servidor" });
+  }
+};
 
-async function getCollection(collectionName){
+export const postAutomovil = async (req, res) => {
+  try {
+    const { id, marca, modelo, anio, tipo, capacidad, precio_diario } = req.body;
+    const db = await conection();
+    const nuevo = { id, marca, modelo, anio, tipo, capacidad, precio_diario };
+    await db.Automovil.insertOne(nuevo);
+    res.json(nuevo);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Hubo un error al agregar el automovil" });
+  }
+};
+
+export const deleteAutomovil = async (req, res) => {
     try {
-        await client.connect();
-        const database = client.db('AlquilerCampus');
-        const collection = database.collection(collectionName);
-        return collection;
+      const { id } = req.params;
+      const automovilId = new ObjectId(id);
+      const automovilDB = (await conection()).Automovil;
+      const automovil = await automovilDB.findOneAndDelete({
+        _id: automovilId,
+      });
+      res.json({ message: "Se ha elimenado el automovil", automovil });
     } catch (error) {
-        throw "eso no sirve"
+      console.log(error);
+      res
+        .status(500)
+        .json({ error: "Hubo un error al eliminar al automovil de la database" });
     }
-}
-
-const getAutomovil = async (req,res)=>{
-    const validateToken = req.header('token');
-    if (!validateToken){
-        return res.status(401).json({
-            msg: "no tiene token pa"
-        })
-    }
-    try {
-        const validado = jwt.verify(validateToken,process.env.SECRET_OR_PRIVATE_KEY)
-        if(validado){
-            const collection = await getCollection('Automovil');
-            const result = await collection.find().toArray();
-            res.json({
-                result
-            })
-        }
-    } catch (error) {
-        throw "eso no sirve"
-    }
-}
-
-const getAutomovilMas5 = async (req,res)=>{
-    const validateToken = req.header('token');
-    if (!validateToken){
-        return res.status(401).json({
-            msg: "no tiene token pa"
-        })
-    }
-    try {
-        const validado = jwt.verify(validateToken,process.env.SECRET_OR_PRIVATE_KEY)
-        if(validado){
-            const collection = await getCollection('Automovil');
-            const result = await collection.find({capacidad: {$gte: 5}}).toArray();
-            res.json({
-                result
-            })
-        }
-    } catch (error) {
-        throw "eso no sirve"
-    }
-}
-
-const getAutomovilOrdenadoMarcaModelo = async (req,res)=>{
-    const validateToken = req.header('token');
-    if (!validateToken){
-        return res.status(401).json({
-            msg: "no tiene token pa"
-        })
-    }
-    try {
-        const validado = jwt.verify(validateToken,process.env.SECRET_OR_PRIVATE_KEY)
-        if(validado){
-            const collectionAutomovil = await getCollection('Automovil');
-            const automovilesOrdenados = await collectionAutomovil.find().sort({ marca: 1, modelo: 1 }).toArray();
-            res.json(automovilesOrdenados);
-        }
-
-    } catch (error) {
-        throw "eso no sirve"
-    }
-}
-
-module.exports = {
-    getAutomovil,
-    getAutomovilMas5,
-    getAutomovilOrdenadoMarcaModelo
-}
+  };

@@ -1,44 +1,39 @@
-const { MongoClient } = require('mongodb');
-const express = require('express');
+import dotenv from 'dotenv';
+import cors from 'cors';
+import express from "express";
+
+import endpoint1Router from "../router/Endpoints.routes.js"
+import alquilerRouter from "../router/alquiler.routes.js"
+import automovilRouter from "../router/automovil.routes.js"
+import clientesRouter from "../router/clientes.routes.js"
+import empleadoRouter from "../router/empleado.routes.js"
+import devolucionRouter from "../router/registro_devolucion.routes.js"
+import entregaRouter from "../router/registro_entrega.routes.js"
+
+dotenv.config();
 
 class Server {
     constructor(){
         this.app = express();
-        this.port = process.env.PORT;
-        this.client = new MongoClient(process.env.MONGO_URI);
-        this.path = {
-            cliente: '/cliente',
-            automovil: '/automovil',
-            alquiler: '/alquiler',
-            reserva: '/reserva',
-            empleado: '/empleado',
-            sucursal: '/sucursal',
-        };
-        this.middleware();
-        this.connectDB();
+        this.port = process.env.PORT
+
+        this.middlewares();
         this.routes();
     }
 
-    async connectDB(){
-        try {
-            await this.client.connect();
-            console.log("se logro conectar la database por fin");
-        } catch (error) {
-            throw "no se conecta eso"
-        }
-    }
-
-    middleware(){
+    middlewares(){
+        this.app.use(cors());
         this.app.use(express.json());
     }
 
     routes(){
-        this.app.use(this.path.cliente, require('../router/clientes.routes.js'))
-        this.app.use(this.path.automovil, require('../router/automovil.routes.js'))
-        this.app.use(this.path.alquiler, require('../router/alquiler.routes.js'))
-        this.app.use(this.path.reserva, require('../router/reserva.routes.js'))
-        this.app.use(this.path.empleado, require('../router/empleado.routes.js'))
-        this.app.use(this.path.sucursal, require('../router/sucursal.routes.js'))
+        this.app.use("/get" , endpoint1Router)
+        this.app.use("/alquiler" , alquilerRouter)
+        this.app.use("/automovil" , automovilRouter)
+        this.app.use("/cliente" , clientesRouter)
+        this.app.use("/empleado" , empleadoRouter)
+        this.app.use("/devolucion" , devolucionRouter)
+        this.app.use("/entrega" , entregaRouter)
     }
 
     listen(){
@@ -48,4 +43,4 @@ class Server {
     }
 }
 
-module.exports = Server;
+export default Server;

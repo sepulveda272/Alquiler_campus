@@ -1,151 +1,81 @@
-const { MongoClient } = require('mongodb')
-const jwt = require ('jsonwebtoken');
+import { ObjectId } from "mongodb";
+import { client, conection } from "../databases/conection.js";
 
-const client = new MongoClient(process.env.MONGO_URI);
+export const getAlquiler = async (req, res) => {
+  try {
+    const alquilerDB = (await conection()).Alquiler;
+    const result = await alquilerDB
+      .aggregate([
+        {
+          $lookup: {
+            from: "Cliente",
+            localField: "id_cliente",
+            foreignField: "id_cliente",
+            as: "cliente",
+          },
+        },
+        {
+          $unwind: "$cliente",
+        },
+        {
+          $lookup: {
+            from: "Automovil",
+            localField: "id_automovil",
+            foreignField: "id_automovil",
+            as: "automovil",
+          },
+        },
+        {
+          $unwind: "$automovil",
+        },
+        {
+          $project: {
+            _id: 1,
+            id: 1,
+            fecha_inicio: 1,
+            fecha_fin: 1,
+            costo_total: 1,
+            estado: 1,
+            cliente: "$cliente",
+            automovil: "$automovil",
+          },
+        },
+      ])
+      .toArray();
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Error en el servidor" });
+  }
+};
 
-async function getCollection(collectionName){
+export const postAlquiler = async (req, res) => {
+  try {
+    const { id, cliente, automovil, fecha_Inicio,fecha_Fin,costo_Total,estado } = req.body;
+    const db = await conection();
+    const nuevo = { id, cliente, automovil, fecha_Inicio,fecha_Fin,costo_Total,estado };
+    await db.Alquiler.insertOne(nuevo);
+    res.json(nuevo);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Hubo un error al agregar el alquiler" });
+  }
+};
+
+export const deleteAlquiler = async (req, res) => {
     try {
-        await client.connect();
-        const database = client.db('AlquilerCampus');
-        const collection = database.collection(collectionName);
-        return collection;
+      const { id } = req.params;
+      const alquilerId = new ObjectId(id);
+      const alquilerDB = (await conection()).Alquiler;
+      const alquiler = await alquilerDB.findOne({
+        _id: alquilerId,
+      });
+      await alquilerDB.updateOne({ _id: alquilerId }, { $set: { estado: "Falta" } });
+      res.json({ message: "Se ha elimenado el alquiler", alquiler });
     } catch (error) {
-        throw "eso no sirve"
+      console.log(error);
+      res
+        .status(500)
+        .json({ error: "Hubo un error al eliminar al alquiler de la database" });
     }
-}
-
-const getAlquilerCliente = async (req,res)=>{
-    const validateToken = req.header('token');
-    if (!validateToken){
-        return res.status(401).json({
-            msg: "no tiene token pa"
-        })
-    }
-    try {
-        const validado = jwt.verify(validateToken,process.env.SECRET_OR_PRIVATE_KEY)
-        if(validado){
-            const collectionAlquiler = await getCollection('Alquiler');
-
-            const lineaAlquilerCliente = [
-            {
-                $match: {
-                estado: 'Completado'
-                }
-            },
-            {
-                $lookup: {
-                from: 'Cliente',
-                localField: 'cliente',
-                foreignField: 'id',
-                as: 'clienteInfo'
-                }
-            },
-            {
-                $unwind: '$clienteInfo'
-            }
-            ];
-
-            const alquileresActivosConClientes = await collectionAlquiler.aggregate(lineaAlquilerCliente).toArray();
-
-            res.json(alquileresActivosConClientes);
-        }
-    } catch (error) {
-        console.log(error);
-        throw "eso no sirve"
-    }
-}
-
-const getAlquilerPorID = async (req,res)=>{
-    const alquilerId = parseInt(req.params.id);
-    const validateToken = req.header('token');
-    if (!validateToken){
-        return res.status(401).json({
-            msg: "no tiene token pa"
-        })
-    }
-    try {
-        const validado = jwt.verify(validateToken,process.env.SECRET_OR_PRIVATE_KEY)
-        if(validado){
-            const collectionAlquiler  = await getCollection('Alquiler');
-            const alquiler = await collectionAlquiler.findOne({ id: alquilerId });
-
-            if (alquiler) {
-            res.json(alquiler);
-            } else {
-            res.status(404).json({ error: 'Alquiler no encontrado' });
-            }
-        }
-    } catch (error) {
-        throw "eso no sirve"
-    }
-}
-
-const getCostoTotal = async (req,res)=>{
-    const validateToken = req.header('token');
-    if (!validateToken){
-        return res.status(401).json({
-            msg: "no tiene token pa"
-        })
-    }
-    try {
-        const validado = jwt.verify(validateToken,process.env.SECRET_OR_PRIVATE_KEY)
-        if(validado){
-            const collection = await getCollection('Alquiler');
-            const result = await collection.find({costo_total: 280}).toArray();
-            res.json({
-                result
-            })
-        }
-    } catch (error) {
-        throw "eso no sirve"
-    }
-}
-
-const getFechaInicio2023 = async (req,res)=>{
-    const validateToken = req.header('token');
-    if (!validateToken){
-        return res.status(401).json({
-            msg: "no tiene token pa"
-        })
-    }
-    try {
-        const validado = jwt.verify(validateToken,process.env.SECRET_OR_PRIVATE_KEY)
-        if(validado){
-            const collection = await getCollection('Alquiler');
-            const result = await collection.find({fecha_inicio: '2023-07-05'}).toArray();
-            res.json({
-                result
-            })
-        }
-    } catch (error) {
-        throw "eso no sirve"
-    }
-}
-
-const getAlquilerTotalRegistrados = async (req, res)=>{
-    const validateToken = req.header('token');
-    if (!validateToken){
-        return res.status(401).json({
-            msg: "no tiene token pa"
-        })
-    }
-    try {
-        const validado = jwt.verify(validateToken,process.env.SECRET_OR_PRIVATE_KEY)
-        if(validado){
-            const collectionAlquiler = await getCollection('Alquiler');
-            const cantidadTotalAlquileres = await collectionAlquiler.countDocuments();
-            res.json({ cantidadTotalAlquileres });
-        }
-
-    } catch (error) {
-        throw "eso no sirve"
-    }
-}
-
-module.exports = {
-    getAlquilerCliente,
-    getAlquilerPorID,
-    getCostoTotal,
-    getFechaInicio2023,
-    getAlquilerTotalRegistrados
-}
+  };

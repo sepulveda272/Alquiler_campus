@@ -1,11 +1,10 @@
-const { Router } = require('express');
-const { getAutomovil, getAutomovilMas5, getAutomovilOrdenadoMarcaModelo } = require('../controllers/automovil.controllers.js');
+import { Router } from "express"
+import  { getAutomovil, postAutomovil, deleteAutomovil } from '../controllers/automovil.controllers.js';
 
 const router = Router();
 
-router.get('/allautomovil', getAutomovil);
-router.get('/capacidad5', getAutomovilMas5);
-router.get('/ordenarMaMo', getAutomovilOrdenadoMarcaModelo);
+router.get('/', getAutomovil);
+router.post('/add', postAutomovil);
+router.delete('/:id', deleteAutomovil);
 
-
-module.exports = router;
+export default router;
