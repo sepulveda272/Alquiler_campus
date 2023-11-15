@@ -1,69 +1,98 @@
+# Documentación: Mejora del Sistema de Gestión de Alquiler de Autos
+## Resumen
+La presente documentación describe la iniciativa de mejora del sistema de gestión de alquiler y reservas de una empresa dedicada al alquiler de autos. El objetivo principal es optimizar los procesos internos y proporcionar un servicio más eficiente a los clientes. Actualmente, la empresa utiliza una base de datos MongoDB, pero enfrenta desafíos en la integración de información y en la organización del proceso de registro de entrega y devolución de vehículos.
+
+## Problema Identificado
+El principal problema identificado es la falta de integración entre las diversas tablas de la base de datos, lo que complica la gestión y seguimiento de alquileres y reservas en las sucursales. Asimismo, el proceso de registro de entrega y devolución de vehículos no está correctamente organizado, lo que puede resultar en errores de datos y un servicio insatisfactorio para los clientes.
+
+## Objetivos de la Mejora
+1. **Integración de Información:** Desarrollar una solución que permita la integración de la información de clientes, automóviles, alquileres y reservas en un solo sistema.
+
+2. **Optimización del Proceso de Registro:** Implementar un sistema eficiente de registro de entrega y devolución de vehículos para evitar errores en los datos.
+
+3. **Desarrollo de una Aplicación Web:** Utilizar Node.js y Express para el backend de una aplicación web que facilite el registro de nuevos clientes, la administración de la disponibilidad de automóviles, la realización de alquileres y reservas, y el seguimiento detallado de cada transacción.
+
+4. **Seguridad de la Información:** Implementar un sistema de autenticación basado en JWT (JSON Web Tokens) para garantizar la seguridad de la información.
+
+## Solución Propuesta
+La solución propuesta consiste en desarrollar una aplicación web utilizando Node.js y Express para el backend. Se utilizará una base de datos MongoDB para almacenar toda la información relacionada con clientes, automóviles, alquileres, reservas, sucursales y empleados. La aplicación permitirá a los empleados realizar diversas operaciones, como el registro de nuevos clientes, la administración de la disponibilidad de automóviles, la realización de alquileres y reservas, y el seguimiento detallado de cada entrega y devolución de vehículos. Además, se garantizará la seguridad de la información mediante un sistema de autenticación basado en JWT.
+
+## Beneficios Esperados
+Con esta solución, la empresa podrá contar con un sistema centralizado y eficiente que mejorará la gestión de todos los procesos relacionados con el alquiler de autos. Esto redundará en una mayor satisfacción de los clientes y aumentará la competitividad en el mercado.
+
+**Fecha de última actualización:** [14/11/2023]
+
+## Recursos Utilizados
+* Node.js y Express: Utilizados para el desarrollo del backend de la aplicación.
+* MongoDB: Base de datos utilizada para almacenar toda la información.
+* JWT (JSON Web Tokens): Sistema de autenticación implementado para garantizar la seguridad de la información.
+
 # ENDPOINTS
 
-2. Mostrar todos los clientes registrados en la base de datos.
+1. **Mostrar todos los clientes registrados en la base de datos.**
 
-* En este endpoint es donde se genera el JWT para que a continuacion con los demas lo use para que lo pueda validar los metodos get
-* * http://localhost:8000/cliente/allcliente
+* http://localhost:8000/get/endpoint1
 
-3. Obtener todos los automóviles disponibles para alquiler.
+2. **Obtener todos los automóviles disponibles para alquiler.**
 
-* * http://localhost:8000/automovil/allautomovil
+* http://localhost:8000/get/endpoint2
 
-4. Listar todos los alquileres activos junto con los datos de los clientes relacionados.
+3. **Listar todos los alquileres activos junto con los datos de los clientes relacionados.**
 
-* * http://localhost:8000/alquiler/alquilerCliente
+* http://localhost:8000/get/endpoint3
 
-5. Mostrar todas las reservas pendientes con los datos del cliente y el automóvil reservado.
+4. **Mostrar todas las reservas pendientes con los datos del cliente y el automóvil reservado.**
 
-* * http://localhost:8000/reserva/reserva
+* http://localhost:8000/get/endpoint4
 
-6. Obtener los detalles del alquiler con el ID_Alquiler específico.
+5. **Obtener los detalles del alquiler con el ID_Alquiler específico.**
 
-* * http://localhost:8000/alquiler/ (A qui va el numero del id)
+* http://localhost:8000/get/endpoint5/ (A qui va el numero del id)
 
-7. Listar los empleados con el cargo de "Vendedor".
+6. **Listar los empleados con el cargo de "Vendedor".**
 
-* * http://localhost:8000/empleado/empleadoV
+* http://localhost:8000/get/endpoint6
 
-8. Mostrar la cantidad total de automóvil es disponibles en cada sucursal.
+7. **Mostrar la cantidad total de automóviles disponibles en cada sucursal.**
 
-* * http://localhost:8000/sucursal/sucursalesT
+* http://localhost:8000/get/endpoint7
 
-9. Obtener el costo total de un alquiler específico.
+8. **Obtener el costo total de un alquiler específico.**
 
-* * http://localhost:8000/alquiler/costo
+* http://localhost:8000/get/endpoint8
 
-10. Listar los clientes con el DNI específico.
+9. **Listar los clientes con el DNI específico.**
 
-* * http://localhost:8000/cliente/clienteDNI
+* http://localhost:8000/get/endpoint9
 
-11. Mostrar todos los automóviles con una capacidad mayora 5 personas.
+10. **Mostrar todos los automóviles con capacidad mayor a 5 personas.**
 
-* * http://localhost:8000/automovil/capacidad5
+* http://localhost:8000/get/endpoint10
 
-12. Obtener los detalles del alquiler que tiene fecha de inicio en '2023-07-05'.
+11. **Obtener los detalles del alquiler que tiene fecha de inicio en '2023-07-05'.**
 
-* * http://localhost:8000/alquiler/fechaInit2023
+* http://localhost:8000/get/endpoint11
 
-13. Listar las reservas pendientes realizadas por un cliente específico.
+12. **Listar las reservas pendientes realizadas por un cliente específico.**
 
-* * http://localhost:8000/cliente/ (A qui va el numero del id)
+* http://localhost:8000/get/endpoint12/ (A qui va el numero del id)
 
-14. Mostrar los empleados con cargo de "Gerente"o"Asistente".
+13. **Mostrar los empleados con cargo de "Gerente" o "Asistente".**
 
-* * http://localhost:8000/empleado/empleadoC
+* http://localhost:8000/get/endpoint13
 
-16. Listar todos los automóviles ordenados por marca y modelo.
+14. **Obtener los datos de los clientes que realizaron al menos un alquiler.**
 
-* * http://localhost:8000/automovil/ordenarMaMo
+* http://localhost:8000/get/endpoint14
 
-17. Mostrar la cantidad total de automóviles en cada sucursal junto con su dirección.
+15. **Listar todos los automóviles ordenados por marca y modelo.**
 
-* * http://localhost:8000/sucursal/cantiddadTotal
+* http://localhost:8000/get/endpoint15
 
-18. Obtener la cantidad total de alquileres registrados en la base de datos.
+16. **Mostrar la cantidad total de automóviles en cada sucursal junto con su dirección.**
 
-* * http://localhost:8000/alquiler/totalRegistro
+* http://localhost:8000/get/endpoint16
 
+17. **Obtener la cantidad total de alquileres registrados en la base de datos.**
 
-## Faltaron los puntos 15, 19, 20, 21 pero el resto es FUNCIONAL 
+* http://localhost:8000/get/endpoint17
