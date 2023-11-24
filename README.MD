@@ -32,12 +32,12 @@ Con esta solución, la empresa podrá contar con un sistema centralizado y efici
 1. Clonar el repositorio:
 
 ```bash
-https://github.com/sepulveda272/Filtro_diacnostico_nodejs.git
+https://github.com/sepulveda272/Alquiler_campus.git
 ```
 2. Instalar dependencias:
 
 ```bash
-cd Filtro_diacnostico_nodejs
+cd Alquiler_campus
 npm install
 ```
 3. Iniciar la aplicación:
