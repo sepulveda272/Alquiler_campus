@@ -27,6 +27,26 @@ Con esta solución, la empresa podrá contar con un sistema centralizado y efici
 * MongoDB: Base de datos utilizada para almacenar toda la información.
 * JWT (JSON Web Tokens): Sistema de autenticación implementado para garantizar la seguridad de la información.
 
+## Instalación y Ejecución
+
+1. Clonar el repositorio:
+
+```bash
+https://github.com/sepulveda272/Filtro_diacnostico_nodejs.git
+```
+2. Instalar dependencias:
+
+```bash
+cd Filtro_diacnostico_nodejs
+npm install
+```
+3. Iniciar la aplicación:
+
+```bash
+npm run dev
+```
+4. Acceder a los endpoints utilizando Postman o cualquier otra herramienta de prueba de API.
+
 # ENDPOINTS
 
 1. **Mostrar todos los clientes registrados en la base de datos.**
